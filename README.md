@@ -8,4 +8,4 @@ From the project root.
 mkdir build && cd build && cmake .. && make
 ```
 ## Run
-Run with flag '--help' for info about how to run it.
+In the build folder you will find the executable. Run it with flag '--help' for info.
