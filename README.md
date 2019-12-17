@@ -1,4 +1,4 @@
-# Bike Launcher
+# Backend Launcher
 Run a bunch of bike backends in a simple command.
 # Usage
 First you need to build.

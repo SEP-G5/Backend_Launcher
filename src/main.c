@@ -2,6 +2,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 static const char *const usage[] = {"launcher [options] [[--] args]",
@@ -37,6 +38,9 @@ int launcher(int node_count, const char *path) {
       return run(path, i);
     } else {
       printf("Starting child %d.\n", i);
+      const struct timespec req = {0, 1000 * 1000 * 250};
+      struct timespec rem;
+      nanosleep(&req, &rem);
     }
   }
 
