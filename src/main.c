@@ -40,7 +40,6 @@ int launcher(int node_count, const char *path) {
     }
   }
 
-  ++i;
   printf("Running myself as child %d.\n", i);
   int res = run(path, i);
 
