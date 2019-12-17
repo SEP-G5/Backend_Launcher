@@ -15,8 +15,8 @@ typedef struct {
 int run(const char *path, int num) {
   enum { kCmdLen = 512 };
   char cmd[kCmdLen];
-  int node_port = 35020 + num;
-  int rest_port = 8010 + num;
+  int node_port = 35010 + num;
+  int rest_port = 8000 + num;
   snprintf(cmd, kCmdLen, "%s -n 0.0.0.0:%d -r %d", path, node_port, rest_port);
 
   int res = system(cmd);
