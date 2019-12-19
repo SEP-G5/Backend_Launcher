@@ -13,11 +13,11 @@ typedef struct {
   int num;
 } Data;
 
-int run(const char *path, int num) {
+int run(const char *path, int num, int offset) {
   enum { kCmdLen = 512 };
   char cmd[kCmdLen];
-  int node_port = 35010 + num;
-  int rest_port = 8000 + num;
+  int node_port = 35010 + num + offset;
+  int rest_port = 8000 + num + offset;
   snprintf(cmd, kCmdLen, "%s -n 0.0.0.0:%d -r %d", path, node_port, rest_port);
 
   int res = system(cmd);
@@ -25,7 +25,7 @@ int run(const char *path, int num) {
   return res;
 }
 
-int launcher(int node_count, const char *path) {
+int launcher(int node_count, const char *path, int offset) {
   printf("Launching %d nodes, with path\n[%s]\n", node_count, path);
 
   int *pids = malloc(sizeof(int) * node_count);
@@ -35,7 +35,7 @@ int launcher(int node_count, const char *path) {
     if (pids[i] == 0) {
       fclose(stdout);
       fclose(stdin);
-      return run(path, i);
+      return run(path, i, offset);
     } else {
       printf("Starting child %d.\n", i);
       const struct timespec req = {0, 1000 * 1000 * 250};
@@ -45,7 +45,7 @@ int launcher(int node_count, const char *path) {
   }
 
   printf("Running myself as child %d.\n", i);
-  int res = run(path, i);
+  int res = run(path, i, offset);
 
   printf("Killing children.\n");
   for (i = 0; i < node_count - 1; i++) {
@@ -59,6 +59,7 @@ int launcher(int node_count, const char *path) {
 int main(int argc, const char **argv) {
   int node_count = 0;
   char *path = NULL;
+  int offset = 0;
 
   struct argparse_option options[] = {
       OPT_HELP(),
@@ -66,6 +67,9 @@ int main(int argc, const char **argv) {
                   0, 0),
       OPT_STRING('p', "path", &path, "Path to backend executable (full path).",
                  NULL, 0, 0),
+      OPT_INTEGER('o', "offset", &offset, "Normally, the port starts from 35010 "
+                  "and 8000, then increments by one for each node. Setting an "
+                  "offset of 10 will have them start at 35020 and 8010.", NULL, 0, 0),
       OPT_END(),
   };
 
@@ -82,6 +86,10 @@ int main(int argc, const char **argv) {
     printf("No path set, defaulting to ls\n");
     path = "ls";
   }
+  if (offset < 0) {
+    printf("Cannot have negative offset, defaulting to 0.\n");
+    offset = 0;
+  }
 
-  return launcher(node_count, path);
+  return launcher(node_count, path, offset);
 }
