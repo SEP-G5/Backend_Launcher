@@ -25,7 +25,7 @@ int run(const char *path, int num, int offset) {
   return res;
 }
 
-int launcher(int node_count, const char *path, int offset, int slow_mode) {
+int launcher(int node_count, const char *path, int offset, int wait) {
   printf("Launching %d nodes, with path\n[%s]\n", node_count, path);
 
   int *pids = malloc(sizeof(int) * node_count);
@@ -39,8 +39,8 @@ int launcher(int node_count, const char *path, int offset, int slow_mode) {
     } else {
       printf("Starting child %d of %d.\n", i, node_count);
       const struct timespec req =
-          slow_mode
-              ? (struct timespec){.tv_sec = 20, .tv_nsec = 0}
+          wait
+              ? (struct timespec){.tv_sec = wait, .tv_nsec = 0}
               : (struct timespec){.tv_sec = 0, .tv_nsec = 1000 * 1000 * 250};
       struct timespec rem;
       nanosleep(&req, &rem);
@@ -63,7 +63,7 @@ int main(int argc, const char **argv) {
   int node_count = 0;
   char *path = NULL;
   int offset = 0;
-  int slow_mode = 0;
+  int wait = 0;
 
   struct argparse_option options[] = {
       OPT_HELP(),
@@ -76,8 +76,8 @@ int main(int argc, const char **argv) {
                   "and 8000, then increments by one for each node. Setting an "
                   "offset of 10 will have them start at 35020 and 8010.",
                   NULL, 0, 0),
-      OPT_BOOLEAN('s', "slow", &slow_mode,
-                  "After each node connects, wait a few seconds", NULL, 0, 0),
+      OPT_INTEGER('w', "wait", &wait,
+                  "How many seconds to wait before launching another node.", NULL, 0, 0),
       OPT_END(),
   };
 
@@ -98,6 +98,10 @@ int main(int argc, const char **argv) {
     printf("Cannot have negative offset, defaulting to 0.\n");
     offset = 0;
   }
+  if (wait < 0) {
+    printf("Cannot have negative wait, defaulting to 0.\n");
+    wait = 0;
+  }
 
-  return launcher(node_count, path, offset, slow_mode);
+  return launcher(node_count, path, offset, wait);
 }
