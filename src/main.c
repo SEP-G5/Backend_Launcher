@@ -37,7 +37,7 @@ int launcher(int node_count, const char *path, int offset, int slow_mode) {
       fclose(stdin);
       return run(path, i, offset);
     } else {
-      printf("Starting child %d.\n", i);
+      printf("Starting child %d of %d.\n", i, node_count);
       const struct timespec req =
           slow_mode
               ? (struct timespec){.tv_sec = 20, .tv_nsec = 0}
